@@ -1,4 +1,4 @@
-Uma análise sobre ataques DDoS.
+## Uma análise sobre ataques DDoS.
 * Link do dataset: https://www.kaggle.com/datasets/oktayrdeki/ddos-traffic-dataset
 
 ## Como rodar os códigos (no Windows) sem erro de versão:
@@ -13,4 +13,8 @@ python -m venv .venv
 * Instalação das dependências somente no ambiente virtual:
 ```bash
 pip install -r requirements.txt
+```
+* Rodando a dashboard:
+```bash
+streamlit run dashboard.py
 ```
