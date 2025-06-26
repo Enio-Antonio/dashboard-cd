@@ -12,7 +12,7 @@ data = pd.read_csv('DDoS_dataset.csv')
 
 # Sidebar
 st.sidebar.title("Navegação")
-opcao = st.sidebar.selectbox("Selecione o gráfico:", ["Pizza", "Barras", "Histograma", "Protocol"])
+opcao = st.sidebar.selectbox("Selecione o gráfico:", ["Pizza", "Barras", "Histograma", "Protocol", "Top 10 IP's"])
 
 if opcao == "Pizza":
     # Contagem de valores na coluna Target
@@ -46,27 +46,37 @@ if opcao == "Pizza":
 
 elif opcao == "Barras":
     st.header("Média de Packets/Time: Tráfego Normal VS DDOS")
-    
+
     # Calcular a média de Packets/Time por Target
-    mean_packets_time = data.groupby('target')['Packets/Time'].mean()
-    
-    # Nomes das categorias
-    labels = ['Tráfego Normal', 'Ataques DDoS']
-    means = [mean_packets_time.get(0, 0), mean_packets_time.get(1, 0)]
-    colors = ['#66b3ff', '#ff9999']
-    
+    mean_packets_time = data.groupby('target')['Packets/Time'].mean().reset_index()
+    mean_packets_time.columns = ['Target', 'Mean Packets/Time']
+
+    # Mapear os nomes das categorias
+    mean_packets_time['Category'] = mean_packets_time['Target'].map({0: 'Tráfego Normal', 1: 'Ataques DDoS'})
+
     # Criar o gráfico de barras
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.bar(labels, means, color=colors, alpha=0.7)
-    ax.set_ylabel('Média de Packets/Time')
-    ax.set_title('Intensidade do Tráfego por Categoria')
-    
-    # Adicionar valores nas barras
-    for i, v in enumerate(means):
-        ax.text(i, v + max(means) * 0.02, f"{v:.2f}", ha='center', fontsize=10)
-    
+    fig = px.bar(
+        mean_packets_time,
+        x='Category',
+        y='Mean Packets/Time',
+        text='Mean Packets/Time',
+        color='Category',
+        color_discrete_map={'Tráfego Normal': '#66b3ff', 'Ataques DDoS': '#ff9999'},
+        title='Intensidade do Tráfego por Categoria',
+        height=500
+    )
+
+    # Ajustar layout
+    fig.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+    fig.update_layout(
+        xaxis_title="Categoria de Tráfego",
+        yaxis_title="Média de Packets/Time",
+        title_x=0.5,  # Centralizar o título
+        showlegend=False  # Ocultar legenda, pois as categorias já estão no eixo X
+    )
+
     # Mostrar o gráfico no Streamlit
-    st.pyplot(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 elif opcao == "Histograma":
     st.header("Distribuição de Packets/Time por Tipo de Tráfego")
@@ -120,4 +130,37 @@ elif opcao == "Protocol":
     )
 
     # Exibir o gráfico no Streamlit
+    st.plotly_chart(fig, use_container_width=True)
+
+elif opcao == "Top 10 IP's":
+    # Filtrar apenas os tráfegos de ataque (Target = 1)
+    attack_data = data[data['target'] == 1]
+
+    # Contar a frequência de cada IP de destino
+    dest_ip_counts = attack_data['Dest IP'].value_counts().head(10).reset_index()
+    dest_ip_counts.columns = ['Dest IP', 'Count']
+
+    # Criar o gráfico de barras
+    fig = px.bar(
+        dest_ip_counts,
+        x='Dest IP',
+        y='Count',
+        text='Count',
+        labels={'Dest IP': 'IP de Destino', 'Count': 'Número de Ataques'},
+        title="Top 10 IPs de Destino Mais Atacados",
+        color='Count',
+        color_continuous_scale='Reds',
+        height=500
+    )
+
+    # Ajustar layout
+    fig.update_layout(
+        xaxis_title="IP de Destino",
+        yaxis_title="Número de Ataques",
+        title_x=0.5,  # Centralizar o título
+        margin=dict(t=100)
+    )
+    fig.update_traces(texttemplate='%{text}', textposition='outside')
+
+    # Mostrar o gráfico no Streamlit
     st.plotly_chart(fig, use_container_width=True)
