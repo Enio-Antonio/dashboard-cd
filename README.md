@@ -1,5 +1,6 @@
 ## Uma análise sobre ataques DDoS.
 * Link do dataset: https://www.kaggle.com/datasets/oktayrdeki/ddos-traffic-dataset
+* Link da versão online: https://dashboard-cd.streamlit.app/
 
 ## Como rodar os códigos (no Windows) sem erro de versão:
 * Criando o ambiente virtual:
