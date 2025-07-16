@@ -15,6 +15,10 @@ python -m venv .venv
 ```bash
 pip install -r requirements.txt
 ```
+* Dependências adicionais (se necessário):
+```bash
+pip install scikit-learn joblib poltly shap
+```
 * Rodando a dashboard:
 ```bash
 streamlit run dashboard.py
