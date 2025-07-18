@@ -59,35 +59,21 @@ elif secao == "Machine Learning":
         X_test    = test_data["X_test"]
         y_test    = test_data["y_test"]
 
-        # 3) Métricas principais
-        st.subheader(f"Acurácia no teste: {m['accuracy']:.2f}")
-        st.text("Relatório de Classificação:")
-        st.text(m["classification_report"])
+        # random forest
+        from sklearn.tree import plot_tree
 
-        # 4) Matriz de Confusão
-        cm = m["confusion_matrix"]
-        fig_cm, ax = plt.subplots()
-        im = ax.imshow(cm, cmap="Blues")
-        for i in range(cm.shape[0]):
-            for j in range(cm.shape[1]):
-                ax.text(j, i, cm[i, j], ha="center", va="center")
-        ax.set_xticks([0, 1]); ax.set_xticklabels(["Normal","DDoS"])
-        ax.set_yticks([0, 1]); ax.set_yticklabels(["Normal","DDoS"])
-        ax.set_title("Matriz de Confusão")
-        st.pyplot(fig_cm)
+        # Exibir a primeira árvore da floresta (índice 0)
+        tree_index = 0
+        feature_names = [f"feature_{i}" for i in range(X_test.shape[1])]
 
-        # 5) Curva ROC (se disponível)
-        if "roc_curve" in m:
-            fpr, tpr = m["roc_curve"]
-            fig_roc, ax2 = plt.subplots()
-            ax2.plot(fpr, tpr, label=f"AUC = {m['auc']:.2f}")
-            ax2.plot([0,1],[0,1],"--", linewidth=1)
-            ax2.set_xlabel("False Positive Rate")
-            ax2.set_ylabel("True Positive Rate")
-            ax2.set_title("ROC Curve")
-            ax2.legend()
-            st.pyplot(fig_roc)
-    # 3) Matriz de Confusão Normalizada (Plotly)
+        fig, ax = plt.subplots(figsize=(20, 10))
+        plot_tree(model.estimators_[tree_index], 
+                feature_names=feature_names, 
+                class_names=["Normal", "DDoS"], 
+                filled=True, ax=ax)
+        st.pyplot(fig)
+
+        # 3) Matriz de Confusão Normalizada (Plotly)
         import plotly.figure_factory as ff
         import numpy as np
 
@@ -103,20 +89,6 @@ elif secao == "Machine Learning":
         )
         fig_norm.update_layout(title="Matriz de Confusão (normalizada)")
         st.plotly_chart(fig_norm, use_container_width=True)
-
-        # 4) Curva Precision-Recall
-        from sklearn.metrics import precision_recall_curve
-        import plotly.express as px
-
-        y_proba = test_data["metrics"].get("y_proba", None) or model.predict_proba(X_test)[:,1]
-        precision, recall, _ = precision_recall_curve(y_test, y_proba)
-        fig_pr = px.area(
-            x=recall, y=precision,
-            title="Precision-Recall Curve",
-            labels={"x":"Recall","y":"Precision"}
-        )
-        st.plotly_chart(fig_pr, use_container_width=True)
-        import pandas as pd
 
         # 5) Importância das Features (Random Forest)
         orig_feats = [c for c in data.columns if c not in ['target', 'Source IP', 'Dest IP']]
