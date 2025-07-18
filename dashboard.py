@@ -70,7 +70,7 @@ elif secao == "Machine Learning":
         plot_tree(model.estimators_[tree_index], 
                 feature_names=feature_names, 
                 class_names=["Normal", "DDoS"], 
-                filled=True, ax=ax)
+                filled=False, ax=ax)
         st.pyplot(fig)
 
         # 3) Matriz de Confusão Normalizada (Plotly)
